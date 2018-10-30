@@ -33,3 +33,7 @@ print(random.getrandbits(4))
 import math
 
 math.pow(a,b)
+
+
+import pywt
+ca,(ch,cv,cd)=pywt.dwt(array,'haar')

@@ -3,11 +3,11 @@ import cv2
 from extraction import P,y
 import random
 import math
-
+import pywt
 
 
 #program start
-img=cv2.imread('image/orignal_lion.jpg')
+img=cv2.imread('image/orignal_lion.jpg')  #array
 q=np.array(
             [[16,11,10,16,24,40,51,61],
             [12,12,14,19,26,58,60,55],
@@ -79,3 +79,24 @@ sw=np.zeros(n/4,m/4)
 for i in range(n/4):
     for j in range(m/4):
         sw[i][j]=iw^cw[i][j]
+i=0
+temp=np.zeros(4,4)
+img_emb=np.zeros(n,m)
+while i<n;
+    j=0
+    while j<m:
+        for r in range(4):
+            for c in range(4):
+                temp[r][c]=imq[i+r][j+c]
+        q_ada=11+2*pblock[i/4][j/4]
+        coeffs=pywt.dw2(temp,'haar')
+        ca,(ch,cv,cd)=coeffs
+        ca[1][1]/=q_ada
+        coeffs=ca,(ch,cv,cd)
+        temp=pywt.idwt2(coeffs,'haar')
+        for r in range(4):
+            for c in range(4):
+                img_emb[i+r][j+c]=temp[r][c]
+        j+=4
+    i+=4
+cv2.imwrite('embedded.png',img_emb)
