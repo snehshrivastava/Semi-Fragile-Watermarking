@@ -7,6 +7,12 @@ import pywt
 
 
 #program start
+#Deffie Hellmann Key Exchange Protocol
+G=random.getrandbits(128)
+a=random.getrandbits(128)
+x=math.pow(G,a)%p
+private=math.pow(y,a)%P
+#end
 img=cv2.imread('image/orignal_lion.jpg')  #array
 q=np.array(
             [[16,11,10,16,24,40,51,61],
@@ -25,10 +31,10 @@ img_q=img
 while i<n :
     j=0
     while j<m:
-        for x in range(8):
-            for y in range(8):
-                img_q[i+x][j+y]=round(img[i+x][j+y]/q[x][y])
-                img_q[i+x][j+y]=img_q[i+x][j+y]*q[x][y]
+        for r in range(8):
+            for c in range(8):
+                img_q[i+r][j+c]=round(img[i+r][j+c]/q[r][c])
+                img_q[i+r][j+c]=img_q[i+r][j+c]*q[r][c]
         j+=8
     i+=8
 i=0
@@ -40,17 +46,17 @@ cw=np.zeros(n/4,m/4)
 while i<n:
     j=0
     while j<m:
-        for x in range(2):
-            for y in range(2):
-                t1[x][y]=img_q[i+x+2][j+y]
+        for r in range(2):
+            for c in range(2):
+                t1[r][c]=img_q[i+r+2][j+c]
         s1=np.linalg.svd(t1,compute_vh=False)
-        for x in range(2):
-            for y in range(2):
-                t2[x][y]=img_q[i+x+2][j+y+2]
+        for r in range(2):
+            for c in range(2):
+                t2[r][c]=img_q[i+r+2][j+c+2]
         s2=np.linalg.svd(t1,compute_vh=False)
-        for x in range(2):
-            for y in range(2):
-                t3[x][y]=img_q[i+x][j+y+2]
+        for r in range(2):
+            for c in range(2):
+                t3[r][c]=img_q[i+r][j+c+2]
         s3=np.linalg.svd(t1,compute_vh=False)
         if s1[1]>=s2[1]:
             b1=1
@@ -68,12 +74,8 @@ while i<n:
         pblock[i/4][j/4]=b1+b2+b3
         j+=4
     i+=4
-#Deffie Hellmann Key Exchange Protocol
-G=random.getrandbits(128)
-a=random.getrandbits(128)
-x=math.pow(G,a)%p
-private=math.pow(y,a)%P
-#end
+
+s=random.getstate()
 iw=random.getrandbits(private)
 sw=np.zeros(n/4,m/4)
 for i in range(n/4):
