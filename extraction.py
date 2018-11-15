@@ -4,6 +4,8 @@ from extraction import G,x,s
 import random
 import math
 import pywt
+from scipy.signal import signaltools
+from scipy.ndimage.measurements import label
 
 
 P=random.getrandbits(128)
@@ -95,9 +97,127 @@ while i<n:
         j+=4
     i+=4
 error_map=np.zeros(n/4,m/4)
+no_ep=0
 for i in range(n/4):
     for j in range(m/4):
         if ew[i][j]==sw[i][j]:
             error_map[i][j]=0
         else:
             error_map[i][j]=1
+            no_ep+=1
+m1=float(float(no_ep)/float((n/4)*(m/4)))
+#applying median filter
+error_map=np.array(error_map,dtype='f')
+if m1<=0.15:
+    error_map=signaltools.medfilt2d(error_map,3)
+no_step=0
+sterror_map=error_map
+for i in range(1,n/4-1):
+    count1=0;
+    count2=0;
+    if error_map[i-1][0]==1:
+        count1+=1
+    if error_map[i-1][1]==1:
+        count1+=1
+    if error_map[i][1]==1:
+        count1+=1
+    if error_map[i+1][1]==1:
+        count1+=1
+    if error_map[i+1][0]==1:
+        count1+=1
+    if count1>4:
+        sterror_map[i][0]=1
+        no_step+=1
+    if error_map[i-1][m/4-1]==1:
+        count2+=1
+    if error_map[i-1][m/4-2]==1:
+        count2+=1
+    if error_map[i][m/4-2]==1:
+        count2+=1
+    if error_map[i+1][m/4-2]==1:
+        count2+=1
+    if error_map[i+1][m/4-1]==1:
+        count2+=1
+    if count2>4:
+        sterror_map[i][m/4-1]=1
+        no_step+=1
+for i in range(1,m/4-1):
+    count1=0
+    count2=0
+    if error_map[0][i-1]==1:
+        count1+=1
+    if error_map[0][i+1]==1:
+        count1+=1
+    if error_map[1][i-1]==1:
+        count1+=1
+    if error_map[1][i]==1:
+        count1+=1
+    if error_map[1][i+1]==1:
+        count1+=1
+    if count1>4:
+        sterror_map[0][i]=1
+        no_step+=1
+    if error_map[n/4-1][i-1]==1:
+        count2+=1
+    if error_map[n/4-1][i+1]==1:
+        count2+=1
+    if error_map[n/4-2][i-1]==1:
+        count2+=1
+    if error_map[n/4-2][i]==1:
+        count2+=1
+    if error_map[n/4-2][i+1]==1:
+        count2+=1
+    if count2>4:
+        sterror_map[n/4-1][i]=1
+        no_step+=1
+for i in range(1,n/4-1):
+    for j in range(1,m/4-1):
+        count=0
+        if error_map[i-1][j-1]==1:
+            count+=1
+        if error_map[i-1][j]==1:
+            count+=1
+        if error_map[i-1][j+1]==1:
+            count+=1
+        if error_map[i][j-1]==1:
+            count+=1
+        if error_map[i][j+1]==1:
+            count+=1
+        if error_map[i+1][j-1]==1:
+            count+=1
+        if error_map[i+1][j]==1:
+            count+=1
+        if error_map[i+1][j+1]==1:
+            count+=1
+        if count>4:
+            sterror_map[i][j]=1
+            no_step+=1
+m2=no_step/no_ep
+structure=np.ones((3,3),dtype=np.int)
+labelled,ncomponents=label(sterror_map,structure)
+nostep=0
+for i in range(n/4):
+    for j in range(m/4):
+        if sterror_map[i][k]==1:
+            nostep+=1
+m3=nostep/ncomponents
+indices=np.indices(sterror_map.shape).T[:,:,[1,0]]
+vertices=np.zeros((n/4,m/4))
+no_v=0
+largestcomponent=0
+teri=np.zeros(ncomponents)
+size_largest=0
+for i in range(1,ncomponents+1):
+    for j in range(len(indices[labelled==i])):
+        if vertices[indices[labelled==i][j][0]]==0:
+            vertices[indices[labelled==i][j][0]]=1
+            no_v+=1
+        if vertices[indices[labelled==i][j][1]]==0:
+            vertices[indices[labelled==i][j][1]]=1
+            no_v+=1
+    if size_largest<no_v:
+        largestcomponent=i
+        teri=no_v
+    teri[i-1]=no_v
+    no_v=0
+m4=np.std(teri)
