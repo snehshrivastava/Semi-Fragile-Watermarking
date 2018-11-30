@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.ndimage.measurements import label
+from PIL import Image
 q=np.array(
       [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
        [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
